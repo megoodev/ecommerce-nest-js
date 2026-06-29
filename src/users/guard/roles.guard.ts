@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { UserRole } from 'src/utils/enum';
 import { JwtPayloadType } from 'src/utils/types';
 import { Roles } from '../decorator/roles.decorator';
+import { CURRUNR_USER_KEY } from 'src/utils/constants';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -34,10 +35,9 @@ export class RolesGuard implements CanActivate {
         );
 
         if (roles.includes(payload.role)) {
-          req['user'] = payload;
-        }
-        else {
-            return false
+          req[CURRUNR_USER_KEY] = payload;
+        } else {
+          return false;
         }
       } catch {
         return false;
@@ -48,7 +48,6 @@ export class RolesGuard implements CanActivate {
     return true;
   }
 }
-
 
 // import { CanActivate, ExecutionContext, Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 // import { ConfigService } from '@nestjs/config';
@@ -76,7 +75,7 @@ export class RolesGuard implements CanActivate {
 
 //     // If no roles are defined on the route, allow access (or handle via JwtGuard)
 //     if (!roles || roles.length === 0) {
-//       return true; 
+//       return true;
 //     }
 
 //     const req: Request = ctx.switchToHttp().getRequest();
@@ -100,7 +99,7 @@ export class RolesGuard implements CanActivate {
 
 //       // 3. CRITICAL FIX: Check if the user's role matches the required roles
 //       const hasRole = roles.includes(payload.role);
-      
+
 //       if (!hasRole) {
 //         throw new ForbiddenException('You do not have permission to access this resource');
 //       }

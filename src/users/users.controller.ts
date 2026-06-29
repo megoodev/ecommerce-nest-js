@@ -17,6 +17,7 @@ import { Roles } from './decorator/roles.decorator';
 import { RolesGuard } from './guard/roles.guard';
 import { UserRole } from 'src/utils/enum';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
+import { UpdateUserDto } from './dto/update.user.dto';
 
 @Controller('/api/user')
 export class UsersController {
@@ -38,14 +39,17 @@ export class UsersController {
   ) {
     return await this.usersService.findAll(query);
   }
-
+  @Roles([UserRole.admin])
+  @UseGuards(RolesGuard)
   @Get(':id')
-  findOne(@Param('id', new ParseIntPipe()) id: number) {
+  findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id', new ParseIntPipe()) id: number, @Body() updateUserDto) {
+  @Roles([UserRole.admin])
+  @UseGuards(RolesGuard)
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 

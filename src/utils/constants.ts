@@ -1,0 +1,1 @@
+export const CURRUNR_USER_KEY = 'user'
