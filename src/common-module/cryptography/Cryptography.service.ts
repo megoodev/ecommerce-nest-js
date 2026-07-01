@@ -3,7 +3,7 @@ import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class CryptographyService {
   constructor() {}
-  async compere(pass: string, hashpassword: string) {
+  async compare(pass: string, hashpassword: string) {
     const correctPassword = await bcrypt.compare(pass, hashpassword);
     if (!correctPassword) {
       throw new NotFoundException('Wrong email or password');

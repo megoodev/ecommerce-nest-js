@@ -25,14 +25,14 @@ export class SignupDto {
   password: string;
 }
 
-export class resetPasswordDto {
+export class ResetPasswordDto {
   @IsString()
   @IsEmail()
   //   email
   email: string;
 }
 
-export class virfyCode {
+export class VerifyCodeDto {
   @IsString()
   @IsEmail()
   //   email

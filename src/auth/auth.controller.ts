@@ -2,10 +2,10 @@ import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import {
-  resetPasswordDto,
+  ResetPasswordDto,
   SigninDto,
   SignupDto,
-  virfyCode,
+  VerifyCodeDto,
 } from './dto/auth.dto';
 
 @Controller('api/auth')
@@ -25,12 +25,12 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  resetPassword(@Body() resetDto: resetPasswordDto) {
+  resetPassword(@Body() resetDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetDto);
   }
-  @Post('virfy-code')
-  virfyCode(@Body() virfyCode: virfyCode) {
-    return this.authService.virfyCode(virfyCode);
+  @Post('verify-code')
+  verifyCode(@Body() verifyCodeDto: VerifyCodeDto) {
+    return this.authService.verifyCode(verifyCodeDto);
   }
   @Post('change-password')
   ChangePassword(@Body() change: SigninDto) {

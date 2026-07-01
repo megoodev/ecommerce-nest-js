@@ -10,10 +10,10 @@ import { JwtPayloadType } from 'src/utils/types';
 import { ConfigService } from '@nestjs/config';
 import { UserRole } from 'src/utils/enum';
 import {
-  resetPasswordDto,
+  ResetPasswordDto,
   SigninDto,
   SignupDto,
-  virfyCode,
+  VerifyCodeDto,
 } from './dto/auth.dto';
 import { CryptographyService } from 'src/common-module/cryptography/Cryptography.service';
 import { ResendService } from 'nestjs-resend';
@@ -33,13 +33,13 @@ export class AuthService {
    * @returns user data and access token
    */
   async SignUp(SignupUserDto: SignupDto) {
-    const exitingUser = await this.databaseService.user.findUnique({
+    const existingUser = await this.databaseService.user.findUnique({
       where: {
         email: SignupUserDto.email,
       },
     });
-    if (exitingUser) {
-      throw new HttpException('user already exisit', 403);
+    if (existingUser) {
+      throw new HttpException('User already exists', 403);
     }
     const { password } = SignupUserDto;
     const hashedPassword = this.CryptographyService.hash(password);
@@ -62,7 +62,7 @@ export class AuthService {
     const accessToken = await this.getAccessToken(user as JwtPayloadType);
     return {
       status: 201,
-      message: 'User signup successfully',
+      message: 'User signed up successfully',
       data: user,
       accessToken: accessToken,
     };
@@ -83,12 +83,12 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('Wrong email or password');
     }
-    this.CryptographyService.compere(signinAuthDto.password, user.password);
+    this.CryptographyService.compare(signinAuthDto.password, user.password);
     const accessToken = await this.getAccessToken(user as JwtPayloadType);
 
     return {
       status: 200,
-      message: 'user signin successfully',
+      message: 'User signed in successfully',
       data: {
         id: user.id,
         name: user.name,
@@ -99,7 +99,7 @@ export class AuthService {
       accessToken,
     };
   }
-  async resetPassword({ email }: resetPasswordDto) {
+  async resetPassword({ email }: ResetPasswordDto) {
     const user = await this.databaseService.user.findFirst({
       where: {
         email,
@@ -169,29 +169,36 @@ export class AuthService {
     </tr>
   </table>  
     `;
-    await this.resendService.send({
-      from: 'you@example.com',
+    const response = await this.resendService.send({
+      from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
       to: email,
-      subject: 'reset password',
+      subject: 'Reset Password',
       html: htmlTemplete,
     });
-    console.log(u);
+
+    if (response.error) {
+      throw new HttpException(
+        `Failed to send email: ${response.error.message}`,
+        500,
+      );
+    }
+
     return {
       status: 200,
-      message: `mesage send successfully`,
+      message: 'Message sent successfully',
     };
   }
-  async virfyCode({ email, code }: virfyCode) {
+  async verifyCode({ email, code }: VerifyCodeDto) {
     const user = await this.databaseService.user.findFirst({
       where: {
         email,
       },
     });
     if (!user) {
-      throw new NotFoundException('user not found');
+      throw new NotFoundException('User not found');
     }
     if (user.VerificationCode !== code) {
-      throw new ForbiddenException('invalid code, try agin');
+      throw new ForbiddenException('Invalid code, try again');
     }
     await this.databaseService.user.update({
       where: {
@@ -202,8 +209,8 @@ export class AuthService {
       },
     });
     return {
-      status: 204,
-      message: 'correct code',
+      status: 200,
+      message: 'Code verified successfully',
     };
   }
 
@@ -227,7 +234,7 @@ export class AuthService {
     const accessToken = this.getAccessToken(user as JwtPayloadType);
     return {
       status: 200,
-      message: 'Passowrd reset successfully!',
+      message: 'Password reset successfully',
       data: user,
       accessToken,
     };
