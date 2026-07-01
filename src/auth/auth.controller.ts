@@ -1,36 +1,39 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
-import { UpdateAuthDto } from './dto/update-auth.dto';
-import { SignupUserDto } from './dto/signup.auth.dto';
-import { SigninAuthDto } from './dto/signin.auth.dto';
+import {
+  resetPasswordDto,
+  SigninDto,
+  SignupDto,
+  virfyCode,
+} from './dto/auth.dto';
 
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('sign-up')
-  create(
-    @Body(
-      new ValidationPipe({
-        whitelist: true,
-      }),
-    )
-    createAuthDto: SignupUserDto,
+  signUp(
+    @Body()
+    createAuthDto: SignupDto,
   ) {
-    return this.authService.create(createAuthDto);
+    return this.authService.SignUp(createAuthDto);
   }
 
-  @Get('sign-in')
-  findOne(@Body() signinAuthDto: SigninAuthDto) {
-    return this.authService.findOne(signinAuthDto);
+  @Post('sign-in')
+  signIn(@Body() signinAuthDto: SigninDto) {
+    return this.authService.SignIn(signinAuthDto);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() resetDto: resetPasswordDto) {
+    return this.authService.resetPassword(resetDto);
+  }
+  @Post('virfy-code')
+  virfyCode(@Body() virfyCode: virfyCode) {
+    return this.authService.virfyCode(virfyCode);
+  }
+  @Post('change-password')
+  ChangePassword(@Body() change: SigninDto) {
+    return this.authService.changePassword(change);
   }
 }

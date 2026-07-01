@@ -3,11 +3,11 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { JwtModule } from '@nestjs/jwt';
-import { assitsModule } from 'src/commen/auth/assits.module';
+import { CryptographyService } from 'src/common-module/cryptography/Cryptography.service';
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService],
-  imports: [DatabaseModule, JwtModule, assitsModule],
+  providers: [UsersService, CryptographyService],
+  imports: [DatabaseModule, JwtModule],
 })
 export class UsersModule {}

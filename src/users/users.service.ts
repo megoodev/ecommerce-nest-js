@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,13 +10,13 @@ import { UserRole } from 'src/utils/enum';
 import { UserRes } from 'src/utils/types';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
-import { HashingService } from 'src/commen/auth/hashing.service';
+import { CryptographyService } from 'src/common-module/cryptography/Cryptography.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly hashingService: HashingService,
+    private readonly hashingService: CryptographyService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserRes> {
@@ -136,7 +137,14 @@ export class UsersService {
     const password = updateUserDto.password
       ? this.hashingService.hash(updateUserDto.password)
       : existingUser.password;
-
+    const exisitingEmail = await this.databaseService.user.findUnique({
+      where: {
+        email: updateUserDto.email,
+      },
+    });
+    if (exisitingEmail && exisitingEmail.id != id) {
+      throw new ForbiddenException('This email take it!');
+    }
     const updatedUser = await this.databaseService.user.update({
       where: {
         id,

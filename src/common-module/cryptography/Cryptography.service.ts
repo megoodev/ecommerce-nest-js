@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 @Injectable()
-export class HashingService {
+export class CryptographyService {
   constructor() {}
   async compere(pass: string, hashpassword: string) {
     const correctPassword = await bcrypt.compare(pass, hashpassword);

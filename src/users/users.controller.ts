@@ -25,13 +25,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('create')
-  async create(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
+  async create(@Body() createUserDto: CreateUserDto) {
     return await this.usersService.create(createUserDto);
   }
 
   @Get()
   async findAll(
-    @Query(new ValidationPipe({ whitelist: true }))
+    @Query()
     query: PagenationQueryDto,
   ) {
     return await this.usersService.findAll(query);

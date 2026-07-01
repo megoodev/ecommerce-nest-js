@@ -6,13 +6,14 @@ import { UserRole } from 'src/utils/enum';
 import { JwtPayloadType } from 'src/utils/types';
 import { Roles } from '../decorator/roles.decorator';
 import { CURRUNR_USER_KEY } from 'src/utils/constants';
-import { tokenService } from 'src/commen/auth/token.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly tokenService: tokenService,
+    private readonly config: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const roles: UserRole[] = this.reflector.getAllAndOverride(Roles, [
@@ -26,8 +27,12 @@ export class RolesGuard implements CanActivate {
     const [type, token] = req.headers.authorization?.split(' ') ?? [];
     if (token && type == 'Bearer') {
       try {
-        const payload: JwtPayloadType =
-          await this.tokenService.verifyToken(token);
+        const payload: JwtPayloadType = await this.jwtService.verifyAsync(
+          token,
+          {
+            secret: this.config.get<string>('SECRET_KEY'),
+          },
+        );
 
         if (roles.includes(payload.role)) {
           req[CURRUNR_USER_KEY] = payload;
@@ -43,5 +48,3 @@ export class RolesGuard implements CanActivate {
     return true;
   }
 }
-
-

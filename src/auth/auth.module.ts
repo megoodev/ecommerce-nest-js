@@ -3,11 +3,18 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { DatabaseModule } from 'src/database/database.module';
 import { JwtModule } from '@nestjs/jwt';
-import { assitsModule } from 'src/commen/auth/assits.module';
+import { CryptographyService } from 'src/common-module/cryptography/Cryptography.service';
+import { ResendModule } from 'nestjs-resend';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
-  imports: [DatabaseModule, JwtModule, assitsModule],
+  providers: [AuthService, CryptographyService],
+  imports: [
+    DatabaseModule,
+    JwtModule,
+    ResendModule.forRoot({
+        apiKey: process.env.RESEND_API_KEY,
+    }),
+  ],
 })
 export class AuthModule {}
