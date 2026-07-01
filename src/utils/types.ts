@@ -1,9 +1,10 @@
 import { UserRole } from './enum';
 
 export type JwtPayloadType = {
+  id: string;
   name: string;
-  role: UserRole;
   email: string;
+  role: UserRole;
 };
 export type UserRes = {
   status: number;

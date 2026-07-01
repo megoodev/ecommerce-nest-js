@@ -19,7 +19,7 @@ model User {
   PhoneNumber      String?
   address          String?
   active           Boolean  @default(true)
-  VerificationCode String
+  VerificationCode String?
   gender           Gender?
   CreatedAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

@@ -5,16 +5,18 @@ import {
 } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/createUserDto';
-import bcrypt from 'bcryptjs';
 import { UserRole } from 'src/utils/enum';
 import { UserRes } from 'src/utils/types';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
-
+import { HashingService } from 'src/commen/auth/hashing.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly hashingService: HashingService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserRes> {
     const existingUser = await this.databaseService.user.findUnique({
@@ -27,7 +29,7 @@ export class UsersService {
       throw new BadRequestException('User with this email already exists');
     }
 
-    const hashedPass = this.hashPassword(createUserDto.password);
+    const hashedPass = this.hashingService.hash(createUserDto.password);
     const user = await this.databaseService.user.create({
       data: {
         name: createUserDto.name,
@@ -132,7 +134,7 @@ export class UsersService {
     const { data: existingUser } = await this.findOne(id);
 
     const password = updateUserDto.password
-      ? this.hashPassword(updateUserDto.password)
+      ? this.hashingService.hash(updateUserDto.password)
       : existingUser.password;
 
     const updatedUser = await this.databaseService.user.update({
@@ -171,9 +173,5 @@ export class UsersService {
       status: 200,
       message: 'User deleted successfully',
     };
-  }
-  private hashPassword(password: string): string {
-    const salt = bcrypt.genSaltSync(10);
-    return bcrypt.hashSync(password, salt);
   }
 }
