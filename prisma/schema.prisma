@@ -14,7 +14,7 @@ model User {
   email            String   @unique
   password         String
   role             Role     @default(user)
-  Avatar            String?
+  Avatar           String?
   age              Int?
   PhoneNumber      String?
   address          String?
@@ -33,4 +33,10 @@ enum Role {
 enum Gender {
   male
   female
+}
+
+model category {
+  id    String @id @default(uuid())
+  name  String @unique
+  image String
 }
