@@ -64,6 +64,14 @@ export class CategoryService {
     if (!category) {
       throw new NotFoundException('Category not found!');
     }
+    const existingName = await this.databaseService.category.findUnique({
+      where: {
+        name: updateCategory.name,
+      },
+    });
+    if (existingName.name === updateCategory.name && id !== existingName.id) {
+      throw new ForbiddenException('Name is existing!');
+    }
     await this.databaseService.category.update({
       where: { id },
       data: {
