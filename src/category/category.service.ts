@@ -1,12 +1,10 @@
 import {
   ForbiddenException,
-  HttpCode,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { categoryDto } from './dto/category.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { isEmpty } from 'class-validator';
 import { updateCategoryDto } from './dto/update.category.dto';
 
 @Injectable()
