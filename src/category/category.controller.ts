@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode,
   Param,
   Patch,
   Post,
@@ -24,9 +23,10 @@ export class CategoryController {
    * @returns  return category data
    * @access admin => just admin can access
    */
+
+  @Post()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  @Post()
   create(@Body() category: categoryDto) {
     return this.categoryService.create(category);
   }
@@ -53,22 +53,23 @@ export class CategoryController {
    * @returns updated single category
    * @access just admin can access
    */
+
+  @Patch(':id')
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  @Patch(':id')
   update(@Param('id') id: string, @Body() updateCategory: updateCategoryDto) {
     return this.categoryService.update(id, updateCategory);
   }
   /**
    * @param id category id
-   * @returns delete a category 
+   * @returns delete a category
    * @access just admin can access
    */
+
+  @Delete(':id')
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  @HttpCode(204)
-  @Delete(':id')
   remove(@Param('id') id: string) {
-    this.categoryService.delete(id);
+    return this.categoryService.delete(id);
   }
 }

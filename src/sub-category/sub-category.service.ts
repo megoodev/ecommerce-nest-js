@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -58,8 +59,14 @@ export class subCategoryService {
   }
 
   async update(id: UUID, name: string) {
+    if (!name || name.trim() === '') {
+      throw new BadRequestException(
+        'You must pass at least one field to update',
+      );
+    }
+
     await this.findOne(id);
-    await this.databaseService.subCategory.update({
+    const sub = await this.databaseService.subCategory.update({
       where: {
         id: id,
       },
@@ -67,6 +74,11 @@ export class subCategoryService {
         name,
       },
     });
+    return {
+      status: 201,
+      message: 'update sub category succussfully',
+      data: sub,
+    };
   }
 
   async delete(id: UUID) {

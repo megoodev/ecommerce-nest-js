@@ -17,6 +17,7 @@ import { RolesGuard } from './guard/roles.guard';
 import { UserRole } from 'src/utils/enum';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
+import { type UUID } from 'crypto';
 
 /**
  * @access just admin can access users
@@ -51,7 +52,7 @@ export class UsersController {
    */
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: UUID) {
     return this.usersService.findOne(id);
   }
   /**
@@ -60,7 +61,7 @@ export class UsersController {
    * @returns  return user data after updated
    */
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(@Param('id') id: UUID, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
   /**
@@ -68,7 +69,7 @@ export class UsersController {
    * @returns  delete a user & return void status 204
    */
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: UUID) {
     return this.usersService.remove(id);
   }
 }

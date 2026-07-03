@@ -11,7 +11,7 @@ import { UserRes } from 'src/utils/types';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { CryptographyService } from 'src/common-module/cryptography/Cryptography.service';
-
+import { type UUID } from 'crypto';
 @Injectable()
 export class UsersService {
   constructor(
@@ -99,7 +99,7 @@ export class UsersService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: UUID) {
     const user = await this.databaseService.user.findUnique({
       where: {
         id,
@@ -131,7 +131,13 @@ export class UsersService {
     };
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserRes> {
+  async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UserRes> {
+    if (!updateUserDto || Object.keys(updateUserDto).length === 0) {
+      throw new BadRequestException(
+        'You must pass at least one field to update',
+      );
+    }
+
     const { data: existingUser } = await this.findOne(id);
 
     const password = updateUserDto.password
@@ -169,7 +175,7 @@ export class UsersService {
     };
   }
 
-  async remove(id: string) {
+  async remove(id: UUID) {
     const { data: existingUser } = await this.findOne(id);
 
     await this.databaseService.user.delete({

@@ -35,7 +35,7 @@ enum Gender {
   female
 }
 
-model category {
+model Category {
   id            String        @id @default(uuid())
   name          String        @unique
   image         String
@@ -47,8 +47,24 @@ model category {
 model subCategory {
   id         String    @id @default(uuid())
   name       String    @unique
-  category   category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId String?
   CreatedAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+}
+
+model Brand {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  image     String
+  CreatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model Coupon {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  expireDate  DateTime
+  discount    Int
+  CreatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -1,5 +1,6 @@
 import {
-  ForbiddenException,
+  BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ export class CategoryService {
       },
     });
     if (existingCategory) {
-      throw new ForbiddenException('Category already existing');
+      throw new ConflictException('Category already exists');
     }
     const category = await this.databaseService.category.create({
       data: {
@@ -53,29 +54,44 @@ export class CategoryService {
       data: category,
     };
   }
-  async update(id: string, updateCategory: updateCategoryDto) {
+  async update(id: string, { name, image }: updateCategoryDto) {
+    if (!name && !image) {
+      throw new BadRequestException(
+        'You must pass at least one field to update',
+      );
+    }
+
     const category = await this.databaseService.category.findUnique({
       where: {
         id,
       },
     });
     if (!category) {
-      throw new NotFoundException('Category not found!');
+      throw new NotFoundException('Category not found');
+    }
+    if (name === category.name) {
+      throw new BadRequestException('This category already uses that name');
     }
     const existingName = await this.databaseService.category.findUnique({
       where: {
-        name: updateCategory.name,
+        name: name ?? category.name,
       },
     });
-    if (existingName.name === updateCategory.name && id !== existingName.id) {
-      throw new ForbiddenException('Name is existing!');
+    if (existingName && existingName.name === name && id !== existingName.id) {
+      throw new ConflictException('Category name is already in use');
     }
-    await this.databaseService.category.update({
+    const updatedCategory = await this.databaseService.category.update({
       where: { id },
       data: {
-        ...updateCategory,
+        name: name ?? category.name,
+        image: image ?? category.image,
       },
     });
+    return {
+      status: 203,
+      message: 'Category updated successfully',
+      data: updatedCategory,
+    };
   }
 
   async delete(id: string) {
@@ -85,10 +101,17 @@ export class CategoryService {
       },
     });
     if (!category) {
-      throw new NotFoundException('Category not found!');
+      throw new NotFoundException({
+        statusCode: 404,
+        message: 'Category not found',
+      });
     }
     await this.databaseService.category.delete({
       where: { id },
     });
+    return {
+      status: 200,
+      message: 'Category deleted successfully',
+    };
   }
 }

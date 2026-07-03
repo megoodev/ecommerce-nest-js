@@ -17,7 +17,7 @@ import { subCategoryDto } from './dto/sub-category.dto';
 import { type UUID } from 'crypto';
 import { updateSubCategoryDto } from './dto/update-sub-category.dto';
 
-@Controller('api/sub-controller')
+@Controller('api/sub-category')
 export class subCategoryController {
   constructor(private readonly subcategory: subCategoryService) {}
   /**
@@ -51,7 +51,7 @@ export class subCategoryController {
    */
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  @Patch()
+  @Patch(':id')
   update(@Param('id') id: UUID, @Body('name') { name }: updateSubCategoryDto) {
     return this.subcategory.update(id, name);
   }
@@ -62,10 +62,11 @@ export class subCategoryController {
    * @returns void
    * @access just admin can access
    */
+
+  @Delete(':id')
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
   @HttpCode(204)
-  @Delete()
   delete(@Param('id') id: UUID) {
     return this.subcategory.delete(id);
   }
