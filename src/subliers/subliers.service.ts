@@ -8,11 +8,14 @@ import { CreateSubliersDto } from './dto/create-subliers.dto';
 import { UpdateSubliersDto } from './dto/update-subliers.dto';
 import { type UUID } from 'crypto';
 import { DatabaseService } from 'src/database/database.service';
+import { AppResponse, SublierData } from 'src/utils/types';
 @Injectable()
 export class SubliersService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(createSubliersDto: CreateSubliersDto) {
+  async create(
+    createSubliersDto: CreateSubliersDto,
+  ): Promise<AppResponse<SublierData>> {
     const exsublier = await this.databaseService.sublier.findFirst({
       where: { name: createSubliersDto.name },
     });
@@ -31,7 +34,7 @@ export class SubliersService {
     };
   }
 
-  async findAll() {
+  async findAll(): Promise<AppResponse<SublierData[]>> {
     const subliers = await this.databaseService.sublier.findMany();
     return {
       status: 200,
@@ -42,7 +45,7 @@ export class SubliersService {
     };
   }
 
-  async findOne(id: UUID) {
+  async findOne(id: UUID): Promise<AppResponse<SublierData>> {
     const sublier = await this.databaseService.sublier.findUnique({
       where: { id },
     });
@@ -56,7 +59,10 @@ export class SubliersService {
     };
   }
 
-  async update(id: UUID, updateSubliersDto: UpdateSubliersDto) {
+  async update(
+    id: UUID,
+    updateSubliersDto: UpdateSubliersDto,
+  ): Promise<AppResponse<SublierData>> {
     if (!UpdateSubliersDto || Object.keys(UpdateSubliersDto).length === 0) {
       throw new BadRequestException(
         'You must pass at least one field to update',
@@ -66,12 +72,15 @@ export class SubliersService {
     const { data: sublier } = await this.findOne(id);
     if (
       updateSubliersDto &&
-      sublier.name === updateSubliersDto.name &&
-      id !== sublier.id
+      (sublier as SublierData).name === updateSubliersDto.name &&
+      id !== (sublier as SublierData).id
     ) {
       throw new ConflictException('Sublier name already exists');
     }
-    if (updateSubliersDto && sublier.name === updateSubliersDto.name) {
+    if (
+      updateSubliersDto &&
+      (sublier as SublierData).name === updateSubliersDto.name
+    ) {
       throw new ConflictException('Sublier already uses that name');
     }
     const updatedsublier = await this.databaseService.sublier.update({
@@ -96,6 +105,7 @@ export class SubliersService {
     return {
       status: 200,
       message: 'Sublier deleted Successfully',
+      data: null,
     };
   }
 }

@@ -16,6 +16,7 @@ import { RolesGuard } from 'src/users/guard/roles.guard';
 import { subCategoryDto } from './dto/sub-category.dto';
 import { type UUID } from 'crypto';
 import { updateSubCategoryDto } from './dto/update-sub-category.dto';
+import { AppResponse, SubCategoryData } from 'src/utils/types';
 
 @Controller('api/sub-category')
 export class subCategoryController {
@@ -29,7 +30,9 @@ export class subCategoryController {
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
   @Post()
-  create(@Body() subCategory: subCategoryDto) {
+  create(
+    @Body() subCategory: subCategoryDto,
+  ): Promise<AppResponse<SubCategoryData>> {
     return this.subcategory.create(subCategory);
   }
   /**
@@ -38,7 +41,7 @@ export class subCategoryController {
    * @access public
    */
   @Get(':id')
-  findAll(@Param('id') id: UUID) {
+  findAll(@Param('id') id: UUID): Promise<AppResponse<SubCategoryData[]>> {
     return this.subcategory.findAll(id);
   }
 
@@ -52,7 +55,10 @@ export class subCategoryController {
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
   @Patch(':id')
-  update(@Param('id') id: UUID, @Body('name') { name }: updateSubCategoryDto) {
+  update(
+    @Param('id') id: UUID,
+    @Body('name') { name }: updateSubCategoryDto,
+  ): Promise<AppResponse<SubCategoryData>> {
     return this.subcategory.update(id, name);
   }
   /**

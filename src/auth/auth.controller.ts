@@ -7,20 +7,22 @@ import {
   SignupDto,
   VerifyCodeDto,
 } from './dto/auth.dto';
+import { AppResponse, UserData } from 'src/utils/types';
 
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('sign-up')
   signUp(
-    @Body()
-    createAuthDto: SignupDto,
-  ) {
+    @Body() createAuthDto: SignupDto,
+  ): Promise<AppResponse<Partial<UserData>>> {
     return this.authService.SignUp(createAuthDto);
   }
 
   @Post('sign-in')
-  signIn(@Body() signinAuthDto: SigninDto) {
+  signIn(
+    @Body() signinAuthDto: SigninDto,
+  ): Promise<AppResponse<Partial<UserData>>> {
     return this.authService.SignIn(signinAuthDto);
   }
 

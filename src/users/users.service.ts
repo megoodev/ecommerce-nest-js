@@ -7,7 +7,7 @@ import {
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/createUserDto';
 import { UserRole } from 'src/utils/enum';
-import { UserRes } from 'src/utils/types';
+import { AppResponse, UserData } from 'src/utils/types';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { CryptographyService } from 'src/common-module/cryptography/Cryptography.service';
@@ -19,7 +19,7 @@ export class UsersService {
     private readonly hashingService: CryptographyService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserRes> {
+  async create(createUserDto: CreateUserDto): Promise<AppResponse<UserData>> {
     const existingUser = await this.databaseService.user.findUnique({
       where: {
         email: createUserDto.email,
@@ -59,7 +59,7 @@ export class UsersService {
     };
   }
 
-  async findAll(query: PagenationQueryDto): Promise<UserRes> {
+  async findAll(query: PagenationQueryDto): Promise<AppResponse<UserData[]>> {
     const { _limit, name, email, page, role, sort } = query;
 
     const users = await this.databaseService.user.findMany({
@@ -94,7 +94,9 @@ export class UsersService {
 
     return {
       status: 200,
-      message: 'successfully',
+      isEmpty: formattedUsers.length === 0,
+      length: formattedUsers.length,
+      message: 'Users found',
       data: formattedUsers,
     };
   }
@@ -131,7 +133,10 @@ export class UsersService {
     };
   }
 
-  async update(id: UUID, updateUserDto: UpdateUserDto): Promise<UserRes> {
+  async update(
+    id: UUID,
+    updateUserDto: UpdateUserDto,
+  ): Promise<AppResponse<UserData>> {
     if (!updateUserDto || Object.keys(updateUserDto).length === 0) {
       throw new BadRequestException(
         'You must pass at least one field to update',
@@ -183,9 +188,5 @@ export class UsersService {
         id: existingUser.id,
       },
     });
-    return {
-      status: 200,
-      message: 'User deleted successfully',
-    };
   }
 }

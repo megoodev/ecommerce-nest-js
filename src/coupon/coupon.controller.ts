@@ -15,6 +15,7 @@ import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
 import { type UUID } from 'crypto';
+import { AppResponse, CouponData } from 'src/utils/types';
 @Controller('api/coupon')
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
@@ -22,28 +23,33 @@ export class CouponController {
   @Post()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  create(@Body() createCouponDto: CreateCouponDto) {
+  create(
+    @Body() createCouponDto: CreateCouponDto,
+  ): Promise<AppResponse<CouponData>> {
     return this.couponService.create(createCouponDto);
   }
 
   @Get()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  findAll() {
+  findAll(): Promise<AppResponse<CouponData[]>> {
     return this.couponService.findAll();
   }
 
   @Get(':id')
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  findOne(@Param('id') id: UUID) {
+  findOne(@Param('id') id: UUID): Promise<AppResponse<CouponData>> {
     return this.couponService.findOne(id);
   }
 
   @Patch(':id')
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  update(@Param('id') id: UUID, @Body() updateCouponDto: UpdateCouponDto) {
+  update(
+    @Param('id') id: UUID,
+    @Body() updateCouponDto: UpdateCouponDto,
+  ): Promise<AppResponse<CouponData>> {
     return this.couponService.update(id, updateCouponDto);
   }
 

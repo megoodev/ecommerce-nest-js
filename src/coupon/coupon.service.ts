@@ -8,10 +8,13 @@ import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { type UUID } from 'crypto';
 import { DatabaseService } from 'src/database/database.service';
+import { AppResponse, CouponData } from 'src/utils/types';
 @Injectable()
 export class CouponService {
   constructor(private readonly databaseService: DatabaseService) {}
-  async create(createCouponDto: CreateCouponDto) {
+  async create(
+    createCouponDto: CreateCouponDto,
+  ): Promise<AppResponse<CouponData>> {
     const exCoupon = await this.databaseService.coupon.findFirst({
       where: {
         name: createCouponDto.name,
@@ -34,7 +37,7 @@ export class CouponService {
     };
   }
 
-  async findAll() {
+  async findAll(): Promise<AppResponse<CouponData[]>> {
     const coupons = await this.databaseService.coupon.findMany();
 
     return {
@@ -46,7 +49,7 @@ export class CouponService {
     };
   }
 
-  async findOne(id: UUID) {
+  async findOne(id: UUID): Promise<AppResponse<CouponData>> {
     const coupon = await this.databaseService.coupon.findUnique({
       where: { id },
     });
@@ -57,12 +60,15 @@ export class CouponService {
 
     return {
       status: 200,
-      messgage: 'Coupon Found',
+      message: 'Coupon Found',
       data: coupon,
     };
   }
 
-  async update(id: UUID, updateCouponDto: UpdateCouponDto) {
+  async update(
+    id: UUID,
+    updateCouponDto: UpdateCouponDto,
+  ): Promise<AppResponse<CouponData>> {
     if (!updateCouponDto || Object.keys(updateCouponDto).length === 0) {
       throw new BadRequestException(
         'You must pass at least one field to update',

@@ -18,6 +18,7 @@ import { UserRole } from 'src/utils/enum';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { type UUID } from 'crypto';
+import { AppResponse, UserData } from 'src/utils/types';
 
 /**
  * @access just admin can access users
@@ -33,18 +34,17 @@ export class UsersController {
    * @returns  user data
    */
   @Post('create')
-  async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.create(createUserDto);
+  create(@Body() createUserDto: CreateUserDto): Promise<AppResponse<UserData>> {
+    return this.usersService.create(createUserDto);
   }
   /**
    * @returns find all users data
    */
   @Get()
-  async findAll(
-    @Query()
-    query: PagenationQueryDto,
-  ) {
-    return await this.usersService.findAll(query);
+  findAll(
+    @Query() query: PagenationQueryDto,
+  ): Promise<AppResponse<UserData[]>> {
+    return this.usersService.findAll(query);
   }
   /**
    * @param id user id
@@ -52,7 +52,7 @@ export class UsersController {
    */
 
   @Get(':id')
-  findOne(@Param('id') id: UUID) {
+  findOne(@Param('id') id: UUID): Promise<AppResponse<UserData>> {
     return this.usersService.findOne(id);
   }
   /**
@@ -61,7 +61,10 @@ export class UsersController {
    * @returns  return user data after updated
    */
   @Patch(':id')
-  update(@Param('id') id: UUID, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id') id: UUID,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<AppResponse<UserData>> {
     return this.usersService.update(id, updateUserDto);
   }
   /**

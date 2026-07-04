@@ -8,11 +8,14 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 import { type UUID } from 'crypto';
 import { DatabaseService } from 'src/database/database.service';
+import { AppResponse, BrandData } from 'src/utils/types';
 @Injectable()
 export class BrandService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(createBrandDto: CreateBrandDto) {
+  async create(
+    createBrandDto: CreateBrandDto,
+  ): Promise<AppResponse<BrandData>> {
     const exbrand = await this.databaseService.brand.findFirst({
       where: { name: createBrandDto.name },
     });
@@ -31,7 +34,7 @@ export class BrandService {
     };
   }
 
-  async findAll() {
+  async findAll(): Promise<AppResponse<BrandData[]>> {
     const brands = await this.databaseService.brand.findMany();
     return {
       status: 200,
@@ -52,11 +55,14 @@ export class BrandService {
     return {
       status: 200,
       message: 'Fond brand',
-      data: brand,
+      data: brand as BrandData,
     };
   }
 
-  async update(id: UUID, updateBrandDto: UpdateBrandDto) {
+  async update(
+    id: UUID,
+    updateBrandDto: UpdateBrandDto,
+  ): Promise<AppResponse<BrandData>> {
     if (!updateBrandDto || Object.keys(updateBrandDto).length === 0) {
       throw new BadRequestException(
         'You must pass at least one field to update',
@@ -67,7 +73,7 @@ export class BrandService {
     if (
       updateBrandDto &&
       brand.name === updateBrandDto.name &&
-      id !== brand.id
+      id !== brand?.id
     ) {
       throw new ConflictException('Brand name already exists');
     }
@@ -93,9 +99,5 @@ export class BrandService {
     await this.databaseService.brand.delete({
       where: { id },
     });
-    return {
-      status: 200,
-      message: 'Brand deleted Successfully',
-    };
   }
 }

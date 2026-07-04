@@ -14,6 +14,7 @@ import { updateCategoryDto } from './dto/update.category.dto';
 import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
+import { AppResponse, CategoryData } from 'src/utils/types';
 
 @Controller('/api/category')
 export class CategoryController {
@@ -27,7 +28,7 @@ export class CategoryController {
   @Post()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  create(@Body() category: categoryDto) {
+  create(@Body() category: categoryDto): Promise<AppResponse<CategoryData>> {
     return this.categoryService.create(category);
   }
   /**
@@ -35,7 +36,7 @@ export class CategoryController {
    * @access all user can access
    */
   @Get()
-  findAll() {
+  findAll(): Promise<AppResponse<CategoryData[]>> {
     return this.categoryService.findAll();
   }
   /**
@@ -44,7 +45,7 @@ export class CategoryController {
    * @access all user can access
    */
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<AppResponse<CategoryData>> {
     return this.categoryService.findOne(id);
   }
   /**
@@ -57,7 +58,10 @@ export class CategoryController {
   @Patch(':id')
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  update(@Param('id') id: string, @Body() updateCategory: updateCategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCategory: updateCategoryDto,
+  ): Promise<AppResponse<CategoryData>> {
     return this.categoryService.update(id, updateCategory);
   }
   /**

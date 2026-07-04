@@ -7,11 +7,15 @@ import {
 import { categoryDto } from './dto/category.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { updateCategoryDto } from './dto/update.category.dto';
+import { AppResponse, CategoryData } from 'src/utils/types';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly databaseService: DatabaseService) {}
-  async create({ name, image }: categoryDto) {
+  async create({
+    name,
+    image,
+  }: categoryDto): Promise<AppResponse<CategoryData>> {
     const existingCategory = await this.databaseService.category.findUnique({
       where: {
         name,
@@ -32,7 +36,7 @@ export class CategoryService {
       data: category,
     };
   }
-  async findAll() {
+  async findAll(): Promise<AppResponse<CategoryData[]>> {
     const categories = await this.databaseService.category.findMany();
     return {
       status: 200,
@@ -41,7 +45,9 @@ export class CategoryService {
       data: categories,
     };
   }
-  async findOne(id: string) {
+  async findOne(
+    id: string,
+  ): Promise<AppResponse<CategoryData>> {
     const category = await this.databaseService.category.findUnique({
       where: { id },
     });
@@ -54,7 +60,10 @@ export class CategoryService {
       data: category,
     };
   }
-  async update(id: string, { name, image }: updateCategoryDto) {
+  async update(
+    id: string,
+    { name, image }: updateCategoryDto,
+  ): Promise<AppResponse<CategoryData>> {
     if (!name && !image) {
       throw new BadRequestException(
         'You must pass at least one field to update',
@@ -109,9 +118,5 @@ export class CategoryService {
     await this.databaseService.category.delete({
       where: { id },
     });
-    return {
-      status: 200,
-      message: 'Category deleted successfully',
-    };
   }
 }
