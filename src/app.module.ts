@@ -8,6 +8,8 @@ import { CategoryModule } from './category/category.module';
 import { subCategoryModule } from './sub-category/sub.category.module';
 import { BrandModule } from './brand/brand.module';
 import { CouponModule } from './coupon/coupon.module';
+import { SubliersModule } from './subliers/subliers.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -16,14 +18,22 @@ import { CouponModule } from './coupon/coupon.module';
     AuthModule,
     CategoryModule,
     subCategoryModule,
+    SubliersModule,
+    BrandModule,
+    CouponModule,
     ResendModule.forRoot({
       apiKey: process.env.RESEND_API_KEY,
     }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    BrandModule,
-    CouponModule,
+    JwtModule.register({
+      global: true,
+      secret: process.env.SECRET_KEY,
+      signOptions: {
+        expiresIn: '60000000s',
+      },
+    }),
   ],
   controllers: [],
   providers: [],

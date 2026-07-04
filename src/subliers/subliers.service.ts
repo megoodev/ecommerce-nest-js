@@ -56,7 +56,7 @@ export class SubliersService {
     };
   }
 
-  async update(id: UUID, UpdateSubliersDto: UpdateSubliersDto) {
+  async update(id: UUID, updateSubliersDto: UpdateSubliersDto) {
     if (!UpdateSubliersDto || Object.keys(UpdateSubliersDto).length === 0) {
       throw new BadRequestException(
         'You must pass at least one field to update',
@@ -65,14 +65,14 @@ export class SubliersService {
 
     const { data: sublier } = await this.findOne(id);
     if (
-      UpdateSubliersDto &&
-      sublier.name === UpdateSubliersDto.name &&
+      updateSubliersDto &&
+      sublier.name === updateSubliersDto.name &&
       id !== sublier.id
     ) {
-      throw new ConflictException('sublier name already exists');
+      throw new ConflictException('Sublier name already exists');
     }
-    if (UpdateSubliersDto && sublier.name === UpdateSubliersDto.name) {
-      throw new ConflictException('sublier already uses that name');
+    if (updateSubliersDto && sublier.name === updateSubliersDto.name) {
+      throw new ConflictException('Sublier already uses that name');
     }
     const updatedsublier = await this.databaseService.sublier.update({
       where: { id },
@@ -83,7 +83,7 @@ export class SubliersService {
     });
     return {
       status: 200,
-      message: 'sublier updated successfully',
+      message: 'Sublier updated successfully',
       data: updatedsublier,
     };
   }
@@ -95,7 +95,7 @@ export class SubliersService {
     });
     return {
       status: 200,
-      message: 'sublier deleted Successfully',
+      message: 'Sublier deleted Successfully',
     };
   }
 }

@@ -7,6 +7,5 @@ import { DatabaseService } from 'src/database/database.service';
 @Module({
   controllers: [CouponController],
   providers: [CouponService, DatabaseService],
-  imports: [JwtModule],
 })
 export class CouponModule {}

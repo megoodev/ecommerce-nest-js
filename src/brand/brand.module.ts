@@ -6,7 +6,7 @@ import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   controllers: [BrandController],
-  providers: [BrandService, JwtService],
+  providers: [BrandService],
   imports: [DatabaseModule],
 })
 export class BrandModule {}
