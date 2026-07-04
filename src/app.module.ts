@@ -31,7 +31,7 @@ import { JwtModule } from '@nestjs/jwt';
       global: true,
       secret: process.env.SECRET_KEY,
       signOptions: {
-        expiresIn: '60000000s',
+        expiresIn: `${10 * 24 * 60 * 60}s`,
       },
     }),
   ],
