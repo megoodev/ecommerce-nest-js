@@ -68,3 +68,11 @@ model Coupon {
   CreatedAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Sublier{
+  id          String   @id @default(uuid())
+  name        String   @unique
+  website DateTime
+  CreatedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
