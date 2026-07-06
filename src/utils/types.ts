@@ -86,3 +86,12 @@ export type UserData = {
   CreatedAt?: Date;
   updatedAt?: Date;
 };
+// Requast product data
+export type RequestproductData = {
+  id: string;
+  titleNeed: string;
+  detailes: string;
+  qauntity?: number;
+  category?: string;
+  user?: UserData;
+};

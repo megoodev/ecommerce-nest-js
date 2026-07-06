@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { CouponController } from './coupon.controller';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   controllers: [CouponController],
-  providers: [CouponService, DatabaseService],
+  providers: [CouponService],
+  imports: [DatabaseModule]
 })
 export class CouponModule {}

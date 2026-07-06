@@ -10,6 +10,7 @@ import { BrandModule } from './brand/brand.module';
 import { CouponModule } from './coupon/coupon.module';
 import { SubliersModule } from './subliers/subliers.module';
 import { JwtModule } from '@nestjs/jwt';
+import { RequestProductModule } from './requast-product/request-product.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtModule } from '@nestjs/jwt';
         expiresIn: `${10 * 24 * 60 * 60}s`,
       },
     }),
+    RequestProductModule,
   ],
   controllers: [],
   providers: [],
