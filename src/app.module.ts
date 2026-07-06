@@ -11,6 +11,7 @@ import { CouponModule } from './coupon/coupon.module';
 import { SubliersModule } from './subliers/subliers.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RequestProductModule } from './requast-product/request-product.module';
+import { TaxModule } from './tax/tax.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { RequestProductModule } from './requast-product/request-product.module';
       },
     }),
     RequestProductModule,
+    TaxModule,
   ],
   controllers: [],
   providers: [],

@@ -95,3 +95,13 @@ export type RequestproductData = {
   category?: string;
   user?: UserData;
 };
+// Tax data
+export type TaxData = {
+  id: string;
+  taxPrice: number;
+  shipingTax: number;
+  CreatedAt: Date;
+  updatedAt: Date;
+};
+
+//
