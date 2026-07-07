@@ -9,18 +9,18 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { subCategoryService } from './sub-category.service';
+import { SubCategoryService } from './sub-category.service';
 import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
 import { subCategoryDto } from './dto/sub-category.dto';
 import { type UUID } from 'crypto';
 import { updateSubCategoryDto } from './dto/update-sub-category.dto';
-import { AppResponse, SubCategoryData } from 'src/utils/types';
-
+import { AppResponse } from 'src/utils/types';
+import { subCategory } from 'generated/prisma/client';
 @Controller('api/sub-category')
 export class subCategoryController {
-  constructor(private readonly subcategory: subCategoryService) {}
+  constructor(private readonly subcategory: SubCategoryService) {}
   /**
    *
    * @body subCategoryDto name & categoryID
@@ -32,7 +32,7 @@ export class subCategoryController {
   @Post()
   create(
     @Body() subCategory: subCategoryDto,
-  ): Promise<AppResponse<SubCategoryData>> {
+  ): Promise<AppResponse<subCategory>> {
     return this.subcategory.create(subCategory);
   }
   /**
@@ -41,7 +41,7 @@ export class subCategoryController {
    * @access public
    */
   @Get(':id')
-  findAll(@Param('id') id: UUID): Promise<AppResponse<SubCategoryData[]>> {
+  findAll(@Param('id') id: UUID): Promise<AppResponse<subCategory[]>> {
     return this.subcategory.findAll(id);
   }
 
@@ -58,7 +58,7 @@ export class subCategoryController {
   update(
     @Param('id') id: UUID,
     @Body('name') { name }: updateSubCategoryDto,
-  ): Promise<AppResponse<SubCategoryData>> {
+  ): Promise<AppResponse<subCategory>> {
     return this.subcategory.update(id, name);
   }
   /**

@@ -2,14 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaxDto } from './dto/create-tax.dto';
 import { UpdateTaxDto } from './dto/update-tax.dto';
 import { DatabaseService } from 'src/database/database.service';
-import { AppResponse, TaxData } from 'src/utils/types';
+import { AppResponse } from 'src/utils/types';
+import { Tax } from 'generated/prisma/client';
 
 @Injectable()
 export class TaxService {
   constructor(private readonly datbaseService: DatabaseService) {}
-  async createOrUpdate(
-    createTaxDto: CreateTaxDto,
-  ): Promise<AppResponse<TaxData>> {
+  async createOrUpdate(createTaxDto: CreateTaxDto): Promise<AppResponse<Tax>> {
     const ex = await this.datbaseService.tax.findFirst();
     if (ex) {
       const tax = await this.datbaseService.tax.update({
@@ -38,7 +37,7 @@ export class TaxService {
     };
   }
 
-  async find(): Promise<AppResponse<TaxData>> {
+  async find(): Promise<AppResponse<Tax>> {
     const tax = await this.datbaseService.tax.findFirst();
 
     if (!tax) {
@@ -51,7 +50,7 @@ export class TaxService {
     };
   }
 
-  async reSet(): Promise<AppResponse<TaxData>> {
+  async reSet(): Promise<AppResponse<Tax>> {
     const tex = await this.datbaseService.tax.findFirst();
     const updatedTax = await this.datbaseService.tax.update({
       where: {

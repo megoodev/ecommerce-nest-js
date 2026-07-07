@@ -9,13 +9,12 @@ import { UpdateBrandDto } from './dto/update-brand.dto';
 import { type UUID } from 'crypto';
 import { DatabaseService } from 'src/database/database.service';
 import { AppResponse, BrandData } from 'src/utils/types';
+import { Brand } from 'generated/prisma/client';
 @Injectable()
 export class BrandService {
   constructor(private readonly databaseService: DatabaseService) {}
 
-  async create(
-    createBrandDto: CreateBrandDto,
-  ): Promise<AppResponse<BrandData>> {
+  async create(createBrandDto: CreateBrandDto): Promise<AppResponse<Brand>> {
     const exbrand = await this.databaseService.brand.findFirst({
       where: { name: createBrandDto.name },
     });
@@ -34,7 +33,7 @@ export class BrandService {
     };
   }
 
-  async findAll(): Promise<AppResponse<BrandData[]>> {
+  async findAll(): Promise<AppResponse<Brand[]>> {
     const brands = await this.databaseService.brand.findMany();
     return {
       status: 200,
@@ -45,7 +44,7 @@ export class BrandService {
     };
   }
 
-  async findOne(id: UUID) {
+  async findOne(id: UUID): Promise<AppResponse<Brand>> {
     const brand = await this.databaseService.brand.findUnique({
       where: { id },
     });
@@ -55,14 +54,14 @@ export class BrandService {
     return {
       status: 200,
       message: 'Fond brand',
-      data: brand as BrandData,
+      data: brand,
     };
   }
 
   async update(
     id: UUID,
     updateBrandDto: UpdateBrandDto,
-  ): Promise<AppResponse<BrandData>> {
+  ): Promise<AppResponse<Brand>> {
     if (!updateBrandDto || Object.keys(updateBrandDto).length === 0) {
       throw new BadRequestException(
         'You must pass at least one field to update',

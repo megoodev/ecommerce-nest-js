@@ -12,6 +12,7 @@ import { SubliersModule } from './subliers/subliers.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RequestProductModule } from './requast-product/request-product.module';
 import { TaxModule } from './tax/tax.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { TaxModule } from './tax/tax.module';
     }),
     RequestProductModule,
     TaxModule,
+    ProductModule,
   ],
   controllers: [],
   providers: [],

@@ -22,7 +22,7 @@ model User {
   VerificationCode String?
   gender           Gender?
   requast          RequestProduct[]
-  CreatedAt        DateTime         @default(now())
+  createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 }
 
@@ -41,7 +41,8 @@ model Category {
   name          String        @unique
   image         String
   subCategories subCategory[]
-  CreatedAt     DateTime      @default(now())
+  product       Product[]
+  createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
 
@@ -50,16 +51,18 @@ model subCategory {
   name       String    @unique
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId String?
-  CreatedAt  DateTime  @default(now())
+  product    Product[]
+  createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 }
 
 model Brand {
-  id        String   @id @default(uuid())
-  name      String   @unique
+  id        String    @id @default(uuid())
+  name      String    @unique
   image     String
-  CreatedAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  product   Product[]
 }
 
 model Coupon {
@@ -67,7 +70,7 @@ model Coupon {
   name       String   @unique
   expireDate DateTime
   discount   Int
-  CreatedAt  DateTime @default(now())
+  createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
 
@@ -75,28 +78,49 @@ model Sublier {
   id        String   @id @default(uuid())
   name      String   @unique
   website   DateTime
-  CreatedAt DateTime @default(now())
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model RequestProduct {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   titleNeed String
   detailes  String
   qauntity  Int?
   category  String?
-
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
-
-  CreatedAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Tax {
   id         String   @id @default(uuid())
-  taxPrice   Int  @default(0)
-  shipingTax Int  @default(0)
-  CreatedAt  DateTime @default(now())
+  taxPrice   Int      @default(0)
+  shipingTax Int      @default(0)
+  createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model Product {
+  id                 String       @id @default(uuid())
+  title              String       @unique
+  description        String
+  quantity           Int
+  imageCover         String
+  images             String[]
+  sold               Int          @default(0)
+  price              Float
+  priceAfterDiscount Float?
+  color              String[]
+  ratingAverage      Int          @default(0)
+  RatingQuantity     Int          @default(0)
+  categoryId         String       @db.Uuid
+  subCategoryId      String?      @db.Uuid
+  brandId            String?      @db.Uuid
+  category           Category     @relation(fields: [categoryId], references: [id])
+  subCategory        subCategory? @relation(fields: [subCategoryId], references: [id])
+  brand              Brand?       @relation(fields: [brandId], references: [id])
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 }

@@ -10,12 +10,12 @@ import { type UUID } from 'crypto';
 import {
   AppResponse,
   JwtPayloadType,
-  RequestproductData,
+  RequestProductWithUser,
 } from 'src/utils/types';
 import { UserRole } from 'src/utils/enum';
 import { CreateRequestProductDto } from './dto/create-request-product.dto';
 import { UpdateRequastProductDto } from './dto/update-request-product.dto';
-import { error } from 'console';
+import { RequestProduct } from 'generated/prisma/client';
 
 @Injectable()
 export class RequestProductService {
@@ -23,7 +23,7 @@ export class RequestProductService {
   async create(
     createRequestProductDto: CreateRequestProductDto,
     userId: UUID,
-  ): Promise<AppResponse<RequestproductData>> {
+  ): Promise<AppResponse<RequestProductWithUser>> {
     const exReqPro = await this.databaseService.requestProduct.findFirst({
       where: {
         titleNeed: createRequestProductDto.titleNeed,
@@ -55,25 +55,40 @@ export class RequestProductService {
         },
       },
     });
-    const newData: RequestproductData = {
-      ...reqPro,
-      user: {
-        ...reqPro.user,
-        role: reqPro.user.role as UserRole,
-      },
-    };
+    // const newData = {
+    //   ...reqPro,
+    //   user: {
+    //     ...reqPro.user,
+    //     role: reqPro.user.role,
+    //   },
+    // };
     return {
       status: 201,
       message: 'Request Product Created successfully',
-      data: newData,
+      data: reqPro,
     };
   }
-  async findAll(user: JwtPayloadType) {
-    let reqProducts;
+  async findAll(
+    user: JwtPayloadType,
+  ): Promise<AppResponse<RequestProductWithUser[]>> {
+    let reqProducts: RequestProductWithUser[];
     if (user.role === UserRole.admin) {
       reqProducts = await this.databaseService.requestProduct.findMany({
-        include: {
-          user: true,
+        select: {
+          id: true,
+          titleNeed: true,
+          detailes: true,
+          qauntity: true,
+          category: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              active: true,
+            },
+          },
         },
       });
     }
@@ -82,29 +97,30 @@ export class RequestProductService {
         where: {
           userId: user.id,
         },
-        include: {
-          user: true,
+        select: {
+          id: true,
+          titleNeed: true,
+          detailes: true,
+          qauntity: true,
+          category: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              active: true,
+            },
+          },
         },
       });
     }
 
-    const newData: RequestproductData[] = reqProducts.map(
-      (val: RequestproductData) => {
-        return {
-          ...val,
-          user: {
-            ...val.user,
-            role: val.user.role as UserRole,
-          },
-        };
-      },
-    );
-
     return {
       status: 200,
       message: 'Request products found',
-      isEmpty: newData.length === 0,
-      length: newData.length,
+      isEmpty: reqProducts.length === 0,
+      length: reqProducts.length,
       data: reqProducts,
     };
   }
@@ -112,7 +128,7 @@ export class RequestProductService {
   async findOne(
     id: UUID,
     user: JwtPayloadType,
-  ): Promise<AppResponse<RequestproductData>> {
+  ): Promise<AppResponse<RequestProduct>> {
     const reqPro = await this.databaseService.requestProduct.findUnique({
       where: {
         id,
@@ -139,7 +155,7 @@ export class RequestProductService {
     id: UUID,
     user: JwtPayloadType,
     updateRequestProductDto: UpdateRequastProductDto,
-  ): Promise<AppResponse<RequestproductData>> {
+  ): Promise<AppResponse<RequestProductWithUser>> {
     const reqProduct = await this.databaseService.requestProduct.findUnique({
       where: {
         id,
@@ -154,7 +170,24 @@ export class RequestProductService {
         id,
       },
       data: { ...updateRequestProductDto },
+      select: {
+        id: true,
+        titleNeed: true,
+        detailes: true,
+        qauntity: true,
+        category: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            active: true,
+          },
+        },
+      },
     });
+
     return {
       status: 200,
       message: 'Updated request product successfully',

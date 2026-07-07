@@ -1,3 +1,4 @@
+import { Prisma } from 'generated/prisma/client';
 import { UserRole } from './enum';
 
 export type JwtPayloadType = {
@@ -104,4 +105,31 @@ export type TaxData = {
   updatedAt: Date;
 };
 
-//
+// 2. Extract the payload type from the args
+export type RequestProductWithUser = Prisma.RequestProductGetPayload<{
+  select: {
+    id: true;
+    titleNeed: true;
+    detailes: true;
+    qauntity: true;
+    category: true;
+    user: {
+      select: {
+        id: true;
+        name: true;
+        email: true;
+        role: true;
+        active: true;
+      };
+    };
+  };
+}>;
+export type FormatUserType = Prisma.UserGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    email: true;
+    active: true;
+    role: true;
+  };
+}>;

@@ -15,7 +15,11 @@ import { UpdateRequastProductDto } from './dto/update-request-product.dto';
 import { Roles } from 'src/users/decorator/roles.decorator';
 import { RolesGuard } from 'src/users/guard/roles.guard';
 import { UserRole } from 'src/utils/enum';
-import { AppResponse, RequestproductData } from 'src/utils/types';
+import {
+  AppResponse,
+  RequestproductData,
+  RequestProductWithUser,
+} from 'src/utils/types';
 import { CURRUNR_USER_KEY } from 'src/utils/constants';
 import { type UUID } from 'crypto';
 
@@ -29,7 +33,7 @@ export class RequastProductController {
   create(
     @Body() createRequastProductDto: CreateRequestProductDto,
     @Req() req: Request,
-  ): Promise<AppResponse<RequestproductData>> {
+  ): Promise<AppResponse<RequestProductWithUser>> {
     return this.requastProductService.create(
       createRequastProductDto,
       req[CURRUNR_USER_KEY].id,
@@ -39,7 +43,7 @@ export class RequastProductController {
   @Get()
   @Roles([UserRole.admin, UserRole.user])
   @UseGuards(RolesGuard)
-  findAll(@Req() req: Request): Promise<AppResponse<RequestproductData[]>> {
+  findAll(@Req() req: Request): Promise<AppResponse<RequestProductWithUser[]>> {
     return this.requastProductService.findAll(req[CURRUNR_USER_KEY]);
   }
 
@@ -57,7 +61,7 @@ export class RequastProductController {
     @Param('id') id: UUID,
     @Req() req: Request,
     @Body() updateRequastProductDto: UpdateRequastProductDto,
-  ) {
+  ): Promise<AppResponse<RequestProductWithUser>> {
     return this.requastProductService.update(
       id,
       req[CURRUNR_USER_KEY],

@@ -8,14 +8,12 @@ import { categoryDto } from './dto/category.dto';
 import { DatabaseService } from 'src/database/database.service';
 import { updateCategoryDto } from './dto/update.category.dto';
 import { AppResponse, CategoryData } from 'src/utils/types';
+import { Category } from 'generated/prisma/client';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly databaseService: DatabaseService) {}
-  async create({
-    name,
-    image,
-  }: categoryDto): Promise<AppResponse<CategoryData>> {
+  async create({ name, image }: categoryDto): Promise<AppResponse<Category>> {
     const existingCategory = await this.databaseService.category.findUnique({
       where: {
         name,
@@ -36,7 +34,7 @@ export class CategoryService {
       data: category,
     };
   }
-  async findAll(): Promise<AppResponse<CategoryData[]>> {
+  async findAll(): Promise<AppResponse<Category[]>> {
     const categories = await this.databaseService.category.findMany();
     return {
       status: 200,
@@ -45,9 +43,7 @@ export class CategoryService {
       data: categories,
     };
   }
-  async findOne(
-    id: string,
-  ): Promise<AppResponse<CategoryData>> {
+  async findOne(id: string): Promise<AppResponse<Category>> {
     const category = await this.databaseService.category.findUnique({
       where: { id },
     });
@@ -63,7 +59,7 @@ export class CategoryService {
   async update(
     id: string,
     { name, image }: updateCategoryDto,
-  ): Promise<AppResponse<CategoryData>> {
+  ): Promise<AppResponse<Category>> {
     if (!name && !image) {
       throw new BadRequestException(
         'You must pass at least one field to update',

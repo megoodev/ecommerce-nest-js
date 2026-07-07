@@ -18,7 +18,8 @@ import { UserRole } from 'src/utils/enum';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { type UUID } from 'crypto';
-import { AppResponse, UserData } from 'src/utils/types';
+import { AppResponse, FormatUserType } from 'src/utils/types';
+import { User } from 'generated/prisma/client';
 
 /**
  * @access just admin can access users
@@ -34,7 +35,7 @@ export class UsersController {
    * @returns  user data
    */
   @Post('create')
-  create(@Body() createUserDto: CreateUserDto): Promise<AppResponse<UserData>> {
+  create(@Body() createUserDto: CreateUserDto): Promise<AppResponse<FormatUserType>> {
     return this.usersService.create(createUserDto);
   }
   /**
@@ -43,7 +44,7 @@ export class UsersController {
   @Get()
   findAll(
     @Query() query: PagenationQueryDto,
-  ): Promise<AppResponse<UserData[]>> {
+  ): Promise<AppResponse<FormatUserType[]>> {
     return this.usersService.findAll(query);
   }
   /**
@@ -52,7 +53,7 @@ export class UsersController {
    */
 
   @Get(':id')
-  findOne(@Param('id') id: UUID): Promise<AppResponse<UserData>> {
+  findOne(@Param('id') id: UUID): Promise<AppResponse<FormatUserType>> {
     return this.usersService.findOne(id);
   }
   /**
@@ -64,7 +65,7 @@ export class UsersController {
   update(
     @Param('id') id: UUID,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<AppResponse<UserData>> {
+  ): Promise<AppResponse<FormatUserType>> {
     return this.usersService.update(id, updateUserDto);
   }
   /**

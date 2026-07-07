@@ -15,6 +15,7 @@ import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
 import { AppResponse, CategoryData } from 'src/utils/types';
+import { Category } from 'generated/prisma/client';
 
 @Controller('/api/category')
 export class CategoryController {
@@ -28,7 +29,7 @@ export class CategoryController {
   @Post()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  create(@Body() category: categoryDto): Promise<AppResponse<CategoryData>> {
+  create(@Body() category: categoryDto): Promise<AppResponse<Category>> {
     return this.categoryService.create(category);
   }
   /**
@@ -36,7 +37,7 @@ export class CategoryController {
    * @access all user can access
    */
   @Get()
-  findAll(): Promise<AppResponse<CategoryData[]>> {
+  findAll(): Promise<AppResponse<Category[]>> {
     return this.categoryService.findAll();
   }
   /**
@@ -45,7 +46,7 @@ export class CategoryController {
    * @access all user can access
    */
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<AppResponse<CategoryData>> {
+  findOne(@Param('id') id: string): Promise<AppResponse<Category>> {
     return this.categoryService.findOne(id);
   }
   /**
@@ -61,7 +62,7 @@ export class CategoryController {
   update(
     @Param('id') id: string,
     @Body() updateCategory: updateCategoryDto,
-  ): Promise<AppResponse<CategoryData>> {
+  ): Promise<AppResponse<Category>> {
     return this.categoryService.update(id, updateCategory);
   }
   /**

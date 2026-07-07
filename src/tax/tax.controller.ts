@@ -4,7 +4,8 @@ import { CreateTaxDto } from './dto/create-tax.dto';
 import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
-import { AppResponse, TaxData } from 'src/utils/types';
+import { AppResponse } from 'src/utils/types';
+import { Tax } from 'generated/prisma/client';
 
 @Controller('api/tax')
 export class TaxController {
@@ -15,21 +16,21 @@ export class TaxController {
   @UseGuards(RolesGuard)
   createOrUpdate(
     @Body() createTaxDto: CreateTaxDto,
-  ): Promise<AppResponse<TaxData>> {
+  ): Promise<AppResponse<Tax>> {
     return this.taxService.createOrUpdate(createTaxDto);
   }
 
   @Get()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  find(): Promise<AppResponse<TaxData>> {
+  find(): Promise<AppResponse<Tax>> {
     return this.taxService.find();
   }
 
   @Delete()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  reSet(): Promise<AppResponse<TaxData>> {
+  reSet(): Promise<AppResponse<Tax>> {
     return this.taxService.reSet();
   }
 }

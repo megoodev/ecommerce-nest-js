@@ -7,7 +7,7 @@ import {
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserDto } from './dto/createUserDto';
 import { UserRole } from 'src/utils/enum';
-import { AppResponse, UserData } from 'src/utils/types';
+import { AppResponse, FormatUserType, UserData } from 'src/utils/types';
 import { PagenationQueryDto } from './dto/pagenationQueryDto';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { CryptographyService } from 'src/common-module/cryptography/Cryptography.service';
@@ -19,7 +19,9 @@ export class UsersService {
     private readonly hashingService: CryptographyService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<AppResponse<UserData>> {
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<AppResponse<FormatUserType>> {
     const existingUser = await this.databaseService.user.findUnique({
       where: {
         email: createUserDto.email,
@@ -48,18 +50,17 @@ export class UsersService {
         active: true,
       },
     });
-    const formattedUsers = {
-      ...user,
-      role: user.role as unknown as UserRole,
-    };
+
     return {
       status: 201,
       message: 'successfully',
-      data: formattedUsers,
+      data: user,
     };
   }
 
-  async findAll(query: PagenationQueryDto): Promise<AppResponse<UserData[]>> {
+  async findAll(
+    query: PagenationQueryDto,
+  ): Promise<AppResponse<FormatUserType[]>> {
     const { _limit, name, email, page, role, sort } = query;
 
     const users = await this.databaseService.user.findMany({
@@ -87,21 +88,18 @@ export class UsersService {
       },
     });
 
-    const formattedUsers = users.map((user) => ({
-      ...user,
-      role: user.role as unknown as UserRole,
-    }));
-
     return {
       status: 200,
-      isEmpty: formattedUsers.length === 0,
-      length: formattedUsers.length,
+      isEmpty: users.length === 0,
+      length: users.length,
       message: 'Users found',
-      data: formattedUsers,
+      data: users,
     };
   }
 
-  async findOne(id: UUID) {
+  async findOne(
+    id: UUID,
+  ): Promise<AppResponse<FormatUserType & { password: string }>> {
     const user = await this.databaseService.user.findUnique({
       where: {
         id,
@@ -127,7 +125,7 @@ export class UsersService {
         name: user.name,
         email: user.email,
         active: user.active,
-        role: user.role as unknown as UserRole,
+        role: user.role,
         password: user.password,
       },
     };
@@ -136,7 +134,7 @@ export class UsersService {
   async update(
     id: UUID,
     updateUserDto: UpdateUserDto,
-  ): Promise<AppResponse<UserData>> {
+  ): Promise<AppResponse<FormatUserType>> {
     if (!updateUserDto || Object.keys(updateUserDto).length === 0) {
       throw new BadRequestException(
         'You must pass at least one field to update',

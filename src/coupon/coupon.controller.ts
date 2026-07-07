@@ -15,7 +15,8 @@ import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
 import { type UUID } from 'crypto';
-import { AppResponse, CouponData } from 'src/utils/types';
+import { AppResponse } from 'src/utils/types';
+import { Coupon } from 'generated/prisma/client';
 @Controller('api/coupon')
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
@@ -25,21 +26,21 @@ export class CouponController {
   @UseGuards(RolesGuard)
   create(
     @Body() createCouponDto: CreateCouponDto,
-  ): Promise<AppResponse<CouponData>> {
+  ): Promise<AppResponse<Coupon>> {
     return this.couponService.create(createCouponDto);
   }
 
   @Get()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  findAll(): Promise<AppResponse<CouponData[]>> {
+  findAll(): Promise<AppResponse<Coupon[]>> {
     return this.couponService.findAll();
   }
 
   @Get(':id')
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  findOne(@Param('id') id: UUID): Promise<AppResponse<CouponData>> {
+  findOne(@Param('id') id: UUID): Promise<AppResponse<Coupon>> {
     return this.couponService.findOne(id);
   }
 
@@ -49,7 +50,7 @@ export class CouponController {
   update(
     @Param('id') id: UUID,
     @Body() updateCouponDto: UpdateCouponDto,
-  ): Promise<AppResponse<CouponData>> {
+  ): Promise<AppResponse<Coupon>> {
     return this.couponService.update(id, updateCouponDto);
   }
 

@@ -8,17 +8,16 @@ import { DatabaseService } from 'src/database/database.service';
 import { subCategoryDto } from './dto/sub-category.dto';
 import { type UUID } from 'crypto';
 import { CategoryService } from 'src/category/category.service';
-import { AppResponse, SubCategoryData, CategoryData } from 'src/utils/types';
+import { AppResponse } from 'src/utils/types';
+
 
 @Injectable()
-export class subCategoryService {
+export class SubCategoryService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly category: CategoryService,
   ) {}
-  async create(
-    subCategory: subCategoryDto,
-  ): Promise<AppResponse<SubCategoryData>> {
+  async create(subCategory: subCategoryDto): Promise<AppResponse<subCategory>> {
     this.category.findOne(subCategory.categoryId);
 
     const exSubCategory = await this.databaseService.subCategory.findUnique({
@@ -45,12 +44,12 @@ export class subCategoryService {
       data: subCate,
     };
   }
-  async findAll(id: UUID): Promise<AppResponse<SubCategoryData[]>> {
+  async findAll(id: UUID): Promise<AppResponse<subCategory[]>> {
     const { data: category } = await this.category.findOne(id);
 
     const subCategories = await this.databaseService.subCategory.findMany({
       where: {
-        categoryId: (category as CategoryData).id,
+        categoryId: category.id,
       },
     });
     return {
@@ -61,7 +60,7 @@ export class subCategoryService {
     };
   }
 
-  async update(id: UUID, name: string): Promise<AppResponse<SubCategoryData>> {
+  async update(id: UUID, name: string): Promise<AppResponse<subCategory>> {
     if (!name || name.trim() === '') {
       throw new BadRequestException(
         'You must pass at least one field to update',

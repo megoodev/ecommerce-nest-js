@@ -15,7 +15,8 @@ import { type UUID } from 'crypto';
 import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
-import { AppResponse, SublierData } from 'src/utils/types';
+import { AppResponse } from 'src/utils/types';
+import { Sublier } from 'generated/prisma/client';
 
 @Controller('api/subliers')
 export class SubliersController {
@@ -26,17 +27,17 @@ export class SubliersController {
   @UseGuards(RolesGuard)
   create(
     @Body() CreateSubliersDto: CreateSubliersDto,
-  ): Promise<AppResponse<SublierData>> {
+  ): Promise<AppResponse<Sublier>> {
     return this.subliersService.create(CreateSubliersDto);
   }
 
   @Get()
-  findAll(): Promise<AppResponse<SublierData[]>> {
+  findAll(): Promise<AppResponse<Sublier[]>> {
     return this.subliersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: UUID): Promise<AppResponse<SublierData>> {
+  findOne(@Param('id') id: UUID): Promise<AppResponse<Sublier>> {
     return this.subliersService.findOne(id);
   }
 
@@ -46,7 +47,7 @@ export class SubliersController {
   update(
     @Param('id') id: UUID,
     @Body() UpdateSubliersDto: UpdateSubliersDto,
-  ): Promise<AppResponse<SublierData>> {
+  ): Promise<AppResponse<Sublier>> {
     return this.subliersService.update(id, UpdateSubliersDto);
   }
 

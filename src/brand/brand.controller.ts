@@ -16,6 +16,7 @@ import { Roles } from 'src/users/decorator/roles.decorator';
 import { UserRole } from 'src/utils/enum';
 import { RolesGuard } from 'src/users/guard/roles.guard';
 import { AppResponse, BrandData } from 'src/utils/types';
+import { Brand } from 'generated/prisma/client';
 
 @Controller('api/brand')
 export class BrandController {
@@ -24,19 +25,17 @@ export class BrandController {
   @Post()
   @Roles([UserRole.admin])
   @UseGuards(RolesGuard)
-  create(
-    @Body() createBrandDto: CreateBrandDto,
-  ): Promise<AppResponse<BrandData>> {
+  create(@Body() createBrandDto: CreateBrandDto): Promise<AppResponse<Brand>> {
     return this.brandService.create(createBrandDto);
   }
 
   @Get()
-  findAll(): Promise<AppResponse<BrandData[]>> {
+  findAll(): Promise<AppResponse<Brand[]>> {
     return this.brandService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: UUID): Promise<AppResponse<BrandData>> {
+  findOne(@Param('id') id: UUID): Promise<AppResponse<Brand>> {
     return this.brandService.findOne(id);
   }
 
@@ -46,7 +45,7 @@ export class BrandController {
   update(
     @Param('id') id: UUID,
     @Body() updateBrandDto: UpdateBrandDto,
-  ): Promise<AppResponse<BrandData>> {
+  ): Promise<AppResponse<Brand>> {
     return this.brandService.update(id, updateBrandDto);
   }
 
