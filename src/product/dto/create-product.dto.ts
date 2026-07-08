@@ -8,7 +8,6 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { type UUID } from 'node:crypto';
 
 export class CreateProductDto {
   @IsString()

@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -11,6 +12,8 @@ import { BrandService } from 'src/brand/brand.service';
 import { type UUID } from 'node:crypto';
 import { AppResponse } from 'src/utils/types';
 import { Product } from 'generated/prisma/client';
+import { productSelectAll } from 'src/utils/constants';
+import { ProductQueryDto } from './dto/query-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -31,6 +34,7 @@ export class ProductService {
     if (exProduct) {
       throw new ConflictException('Prodect already exist!');
     }
+
     await this.categoryService.findOne(createProductDto.categoryId);
     createProductDto.subCategoryId &&
       (await this.subCategoryService.findOne(
@@ -40,42 +44,110 @@ export class ProductService {
       (await this.brandService.findOne(createProductDto.brandId as UUID));
 
     const product = await this.databaseService.product.create({
-      data: {
-        title: createProductDto.title,
-        description: createProductDto.description,
-        quantity: createProductDto.quantity,
-        imageCover: createProductDto.imageCover,
-        images: createProductDto.images,
-        price: createProductDto.price,
-        priceAfterDiscount: createProductDto.priceAfterDiscount,
-        color: createProductDto.color,
-        categoryId: createProductDto.categoryId,
-        subCategoryId: createProductDto.subCategoryId,
-        brandId: createProductDto.brandId,
-      },
+      data: createProductDto,
+      include: productSelectAll,
     });
     return {
       status: 201,
-
       message: 'Product creaSted successfully',
       data: product,
     };
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll(query: ProductQueryDto): Promise<AppResponse<Product[]>> {
+    // 1. Pagination
+    const { _limit, page } = query;
+    const skip = (page - 1) * _limit || 0;
+
+    // 2. Filtration
+    const requestQuery = { ...query };
+    const removeQuery = ['page', '_limit', 'sort', 'key', 'category'];
+    removeQuery.forEach((val) => delete requestQuery[val]);
+
+    const sort = query?.sort || 'asc';
+    const key = query?.key || undefined;
+    if (requestQuery.category) {
+      await this.categoryService.findOne(requestQuery.category);
+    }
+    const whereConditions: any = {
+      price: requestQuery.price || undefined,
+      categoryId: requestQuery.category,
+      ratingAverage: requestQuery.ratingAverage,
+    };
+    if (key) {
+      whereConditions.OR = [
+        {
+          title: {
+            contains: key,
+            mode: 'insensitive',
+          },
+          description: {
+            contains: key,
+            mode: 'insensitive',
+          },
+        },
+        {},
+      ];
+    }
+    const products = await this.databaseService.product.findMany({
+      where: whereConditions,
+      orderBy: {
+        price: sort,
+      },
+      skip,
+      take: _limit ? Number(_limit) : undefined,
+    });
+
+    return {
+      status: 200,
+      message: 'Products found',
+      isEmpty: products.length === 0,
+      length: products.length,
+      data: products,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: UUID): Promise<AppResponse<Product>> {
+    const product = await this.databaseService.product.findUnique({
+      where: {
+        id,
+      },
+      include: productSelectAll,
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    return {
+      status: 200,
+      message: 'Product found',
+      data: product,
+    };
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(
+    id: UUID,
+    updateProductDto: UpdateProductDto,
+  ): Promise<AppResponse<Product>> {
+    await this.findOne(id);
+    const product = await this.databaseService.product.update({
+      where: { id },
+      data: updateProductDto,
+      include: productSelectAll,
+    });
+
+    return {
+      status: 200,
+      message: 'Product updated successfully',
+      data: product,
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: UUID) {
+    await this.findOne(id);
+    await this.databaseService.product.delete({
+      where: { id },
+    });
   }
 }
 // {

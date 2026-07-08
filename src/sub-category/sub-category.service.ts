@@ -9,7 +9,7 @@ import { subCategoryDto } from './dto/sub-category.dto';
 import { type UUID } from 'crypto';
 import { CategoryService } from 'src/category/category.service';
 import { AppResponse } from 'src/utils/types';
-
+import { subCategory } from 'generated/prisma/client';
 
 @Injectable()
 export class SubCategoryService {
@@ -18,7 +18,7 @@ export class SubCategoryService {
     private readonly category: CategoryService,
   ) {}
   async create(subCategory: subCategoryDto): Promise<AppResponse<subCategory>> {
-    this.category.findOne(subCategory.categoryId);
+    await this.category.findOne(subCategory.categoryId);
 
     const exSubCategory = await this.databaseService.subCategory.findUnique({
       where: {

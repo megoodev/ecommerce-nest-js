@@ -1,5 +1,6 @@
-import { Prisma } from 'generated/prisma/client';
+import { Prisma, PrismaClient } from 'generated/prisma/client';
 import { UserRole } from './enum';
+import { PrismaClientExtends } from '@prisma/client/extension';
 
 export type JwtPayloadType = {
   id: string;
@@ -133,3 +134,4 @@ export type FormatUserType = Prisma.UserGetPayload<{
     role: true;
   };
 }>;
+
