@@ -10,7 +10,7 @@ import { Request } from 'express';
 import { UserRole } from 'src/utils/enum';
 import { JwtPayloadType } from 'src/utils/types';
 import { Roles } from '../decorator/roles.decorator';
-import { CURRUNR_USER_KEY } from 'src/utils/constants';
+import { CURRUNT_USER_KEY } from 'src/utils/constants';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -40,7 +40,7 @@ export class RolesGuard implements CanActivate {
         );
 
         if (roles.includes(payload.role)) {
-          req[CURRUNR_USER_KEY] = payload;
+          req[CURRUNT_USER_KEY] = payload;
         } else {
           throw new UnauthorizedException();
         }

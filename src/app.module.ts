@@ -13,6 +13,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { RequestProductModule } from './requast-product/request-product.module';
 import { TaxModule } from './tax/tax.module';
 import { ProductModule } from './product/product.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ProductModule } from './product/product.module';
     RequestProductModule,
     TaxModule,
     ProductModule,
+    ReviewModule,
   ],
   controllers: [],
   providers: [],

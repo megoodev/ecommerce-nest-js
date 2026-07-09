@@ -20,7 +20,7 @@ import {
   RequestproductData,
   RequestProductWithUser,
 } from 'src/utils/types';
-import { CURRUNR_USER_KEY } from 'src/utils/constants';
+import { CURRUNT_USER_KEY } from 'src/utils/constants';
 import { type UUID } from 'crypto';
 
 @Controller('api/request-product')
@@ -36,7 +36,7 @@ export class RequastProductController {
   ): Promise<AppResponse<RequestProductWithUser>> {
     return this.requastProductService.create(
       createRequastProductDto,
-      req[CURRUNR_USER_KEY].id,
+      req[CURRUNT_USER_KEY].id,
     );
   }
 
@@ -44,14 +44,14 @@ export class RequastProductController {
   @Roles([UserRole.admin, UserRole.user])
   @UseGuards(RolesGuard)
   findAll(@Req() req: Request): Promise<AppResponse<RequestProductWithUser[]>> {
-    return this.requastProductService.findAll(req[CURRUNR_USER_KEY]);
+    return this.requastProductService.findAll(req[CURRUNT_USER_KEY]);
   }
 
   @Get(':id')
   @Roles([UserRole.admin, UserRole.user])
   @UseGuards(RolesGuard)
   findOne(@Param('id') id: UUID, @Req() req: Request) {
-    return this.requastProductService.findOne(id, req[CURRUNR_USER_KEY]);
+    return this.requastProductService.findOne(id, req[CURRUNT_USER_KEY]);
   }
 
   @Patch(':id')
@@ -64,7 +64,7 @@ export class RequastProductController {
   ): Promise<AppResponse<RequestProductWithUser>> {
     return this.requastProductService.update(
       id,
-      req[CURRUNR_USER_KEY],
+      req[CURRUNT_USER_KEY],
       updateRequastProductDto,
     );
   }
@@ -73,6 +73,6 @@ export class RequastProductController {
   @Roles([UserRole.user])
   @UseGuards(RolesGuard)
   remove(@Param('id') id: UUID, @Req() req: Request) {
-    return this.requastProductService.remove(id, req[CURRUNR_USER_KEY]);
+    return this.requastProductService.remove(id, req[CURRUNT_USER_KEY]);
   }
 }
