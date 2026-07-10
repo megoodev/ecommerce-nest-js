@@ -11,7 +11,6 @@ import { Review } from 'generated/prisma/client';
 import { type UUID } from 'crypto';
 import { UserRole } from 'src/utils/enum';
 import { ReviewQueryDto } from './dto/query-reviews.dto';
-import { Length } from 'class-validator';
 
 @Injectable()
 export class ReviewService {
@@ -20,6 +19,17 @@ export class ReviewService {
     user: JwtPayloadType,
     createReviewDto: CreateReviewDto,
   ): Promise<AppResponse<Review>> {
+    const product = await this.databaseService.product.findUnique({
+      where: {
+        id: createReviewDto.productId,
+      },
+      include: {
+        reviews: true,
+      },
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
     const exReview = await this.databaseService.review.findUnique({
       where: {
         productId_userId: {
@@ -35,6 +45,19 @@ export class ReviewService {
     }
     const review = await this.databaseService.review.create({
       data: { ...createReviewDto, userId: user.id },
+    });
+    let rating = 0;
+    product.reviews.forEach((val) => {
+      rating += val.rating;
+    });
+    await this.databaseService.product.update({
+      where: {
+        id: createReviewDto.productId,
+      },
+      data: {
+        RatingQuantity: product.RatingQuantity + 1,
+        ratingAverage: (rating + review.rating) / (product.RatingQuantity + 1),
+      },
     });
     return {
       status: 201,
@@ -140,7 +163,6 @@ export class ReviewService {
       data: productReview,
     };
   }
-
   updatedAt: Date;
   async update(
     id: UUID,
@@ -169,14 +191,36 @@ export class ReviewService {
       data: updatedReview,
     };
   }
-
   async remove(id: UUID, user: JwtPayloadType) {
     const exReview = await this.databaseService.review.findUnique({
       where: { id },
+      include: {
+        product: true,
+      },
     });
     if (!exReview) {
       throw new NotFoundException('Review not found');
     }
+    let rating: number;
+    const reviews =
+      (await this.databaseService.review.findMany({
+        where: {
+          id: exReview.productId,
+        },
+      })) || [];
+    reviews.forEach((val) => {
+      rating += val.rating;
+    });
+    await this.databaseService.product.update({
+      where: {
+        id: exReview.productId,
+      },
+      data: {
+        RatingQuantity: exReview.product.RatingQuantity - 1,
+        ratingAverage:
+          (rating - exReview.rating) / (exReview.product.RatingQuantity - 1),
+      },
+    });
     if (user.role === UserRole.admin) {
       await this.databaseService.review.update({
         where: { id },

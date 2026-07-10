@@ -1,12 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { UserRole } from 'src/utils/enum';
 
 export class PagenationQueryDto {
