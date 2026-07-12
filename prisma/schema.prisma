@@ -23,8 +23,10 @@ model User {
   gender           Gender?
   requast          RequestProduct[]
   reviews          Review[]
+  cart             Cart?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+  cartId           String?
 }
 
 enum Role {
@@ -51,7 +53,7 @@ model subCategory {
   id         String    @id @default(uuid())
   name       String    @unique
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId String?  
+  categoryId String?
   product    Product[]
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -73,6 +75,8 @@ model Coupon {
   discount   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  cart       Cart?    @relation(fields: [cartId], references: [id])
+  cartId     String?
 }
 
 model Sublier {
@@ -116,34 +120,61 @@ model Product {
   color              String[]
   ratingAverage      Int          @default(0)
   RatingQuantity     Int          @default(0)
-  categoryId         String      
-  subCategoryId      String?     
-  brandId            String?     
+  categoryId         String
+  subCategoryId      String?
+  brandId            String?
   category           Category     @relation(fields: [categoryId], references: [id])
   subCategory        subCategory? @relation(fields: [subCategoryId], references: [id])
   brand              Brand?       @relation(fields: [brandId], references: [id])
   reviews            Review[]
+  cartItems          CartItem[]
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 }
 
 model Review {
-  id      String @id @default(uuid())
+  id      String  @id @default(uuid())
   content String?
   rating  Int
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
-  deletedBy String?  
+  deletedBy String?
 
-  userId    String 
+  userId    String
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  productId String 
+  productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@unique([productId,userId])
 
+  @@unique([productId, userId])
   @@index([productId, isDeleted])
+}
+
+model Cart {
+  id                      String     @id @default(uuid())
+  userId                  String     @unique
+  coupons                 Coupon[]
+  user                    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items                   CartItem[]
+  totalPrice              Float      @default(0)
+  totalPriceAfterDescount Float      @default(0)
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+  quantity  Int      @default(1)
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
 }

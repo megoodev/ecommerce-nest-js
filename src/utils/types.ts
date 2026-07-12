@@ -18,7 +18,7 @@ export type AppResponse<T = any> = {
   message: string;
   isEmpty?: boolean;
   length?: number;
-  data: T;
+  data?: T;
 };
 
 // ============ DATA TYPES FROM SCHEMA ============
@@ -135,3 +135,11 @@ export type FormatUserType = Prisma.UserGetPayload<{
   };
 }>;
 
+export type cartIncloudeRelations = Prisma.CartGetPayload<{
+  include: {
+    coupons: true,
+    items: {
+      include: {product: true}
+    }
+  };
+}>;
