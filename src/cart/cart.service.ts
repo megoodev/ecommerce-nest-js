@@ -22,9 +22,6 @@ export class CartService {
         where: { id: createCartDto.productId },
       });
       if (!product) throw new NotFoundException('Product not found');
-
-      // check of quanitiy
-
       if (product.quantity == 0)
         throw new ConflictException('Quantity not enough');
       // if cart found else create new cart
@@ -52,9 +49,23 @@ export class CartService {
           productId: createCartDto.productId,
         },
       });
-      const { data: finalCart } = await this.find(userId);
+      const finalCart = await tx.cart.update({
+        where: { userId },
+        data: {
+          totalPrice: {
+            increment: product.price,
+          },
+        },
+        include: {
+          coupons: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
 
-      await this.updateTotalPrice(userId as UUID, tx, finalCart);
       return {
         status: 201,
         message: 'Cart updated successfully',
@@ -62,6 +73,7 @@ export class CartService {
       };
     });
   }
+
   async apllayCoupon(name: string, userId: string) {
     return await this.databaseSercice.$transaction(async (tx) => {
       const coupon = await tx.coupon.findUnique({
@@ -70,10 +82,20 @@ export class CartService {
       if (!coupon) throw new NotFoundException('Coupon not found');
       if (new Date(coupon.expireDate) < new Date())
         throw new BadRequestException('Invalid coupon');
-      // const cart = await this.databaseSercice.cart.findUnique({
-      //   where: { userId },
-      //   include: { items: { include: { product: true } } },
-      // });
+      const exCart = await tx.cart.findUnique({
+        where: {
+          userId,
+        },
+        include: {
+          coupons: true,
+        },
+      });
+      const exCoupon = exCart.coupons.find(
+        (coupon) => coupon.name.toLowerCase() === name.toLowerCase(),
+      );
+      if (exCoupon) {
+        throw new BadRequestException('Coupon already applayed');
+      }
       const cart = await tx.cart.update({
         where: {
           userId,
@@ -81,6 +103,9 @@ export class CartService {
         data: {
           coupons: {
             set: coupon,
+          },
+          totalDiscount: {
+            increment: coupon.discount,
           },
         },
         include: {
@@ -90,18 +115,22 @@ export class CartService {
           coupons: true,
         },
       });
-      await this.updateTotalPrice(userId as UUID, tx, cart);
+      return {
+        status: 201,
+        message: 'apllay coupon successfully',
+        data: cart,
+      };
     });
   }
+
   async updateTotalPrice(userId: UUID, tx: any, cart: cartIncloudeRelations) {
     const totalPrice =
       cart.items.reduce(
         (sum, item) =>
           sum +
-          (Number(item.product.price) - item.product.priceAfterDiscount) *
-            item.quantity,
+          (Number(item.product.price) - item.product.discound) * item.quantity,
         0,
-      ) + cart.coupons.reduce((sum, coupon) => sum + coupon.discount, 0) || 0;
+      ) + cart.coupons.reduce((sum, coupon) => sum + coupon.discount, 0);
 
     await tx.cart.update({
       where: { userId },
@@ -142,85 +171,165 @@ export class CartService {
     userId: string,
     updateCartDto: UpdateCartDto,
   ): Promise<AppResponse<Cart>> {
-    if (
-      updateCartDto.adjustment === undefined &&
-      updateCartDto.quantity === undefined
-    ) {
+    if (!updateCartDto.adjustment && !updateCartDto.quantity) {
       throw new BadRequestException(
         'You must provide either quantity or adjustment',
       );
     }
     return await this.databaseSercice.$transaction(async (tx) => {
-      const cart = await tx.cart.findUnique({ where: { userId } });
+      const cart = await tx.cart.findUnique({
+        where: { userId },
+        include: { items: { include: { product: true } } },
+      });
       if (!cart) throw new BadRequestException('Cart not found');
-
-      const product = await tx.product.findUnique({ where: { id } });
-      if (!product) throw new NotFoundException('Product not found');
-
-      let updateData: any = {};
-      if (updateCartDto.adjustment !== undefined) {
-        updateData.quantity = { increment: updateCartDto.adjustment };
-      } else if (updateCartDto.quantity !== undefined) {
-        updateData.quantity = { set: updateCartDto.quantity };
-      }
-
-      const updatedItem = await tx.cartItem.update({
-        where: {
-          cartId_productId: { cartId: cart.id, productId: id },
-        },
-        data: updateData,
-      });
-      if (updatedItem.quantity > product.quantity) {
-        throw new ConflictException('Quantity exceeds available stock');
-      }
-
-      if (updatedItem.quantity <= 0) {
-        await tx.cartItem.delete({
-          where: { id: updatedItem.id },
-        });
-      }
-      const finalCart = await tx.cart.findUnique({
-        where: { id: cart.id },
-        include: {
-          coupons: true,
-          items: {
-            include: { product: true },
-          },
-        },
-      });
-
-      await this.updateTotalPrice(userId as UUID, tx, finalCart);
-
-      return {
-        status: 200,
-        message: 'Cart updated successfully',
-        isEmpty: finalCart.items.length === 0,
-        length: finalCart.items.length,
-        data: finalCart,
-      };
-    });
-  }
-
-  async remove(
-    id: UUID,
-    userId: string,
-  ): Promise<AppResponse<Cart> & { cartItem?: number }> {
-    return await this.databaseSercice.$transaction(async (tx) => {
-      const { data: cart } = await this.find(userId);
-
-      const itemIndex = cart.items.findIndex((item) => item.productId === id);
-      if (itemIndex === -1)
-        throw new BadRequestException('Product not found in cart');
-      await tx.cartItem.delete({
+      const item = await tx.cartItem.findUnique({
         where: {
           cartId_productId: {
             cartId: cart.id,
             productId: id,
           },
         },
+        include: {
+          product: true,
+        },
       });
-      const { data: finalCart } = await this.find(userId);
-      await this.updateTotalPrice(userId as UUID, tx, finalCart);
+      if (!item) {
+        throw new BadRequestException('item not found');
+      }
+
+      let quantityUpdate: any;
+
+      if (updateCartDto?.quantity) {
+        quantityUpdate = { set: updateCartDto.quantity };
+      } else if (updateCartDto.adjustment) {
+        if (updateCartDto.adjustment === -1) {
+          quantityUpdate = { decrement: 1 };
+        } else {
+          quantityUpdate = { increment: 1 };
+        }
+      }
+
+      if (
+        (updateCartDto.adjustment &&
+          updateCartDto.adjustment == -1 &&
+          item.quantity == 1) ||
+        (updateCartDto.quantity && updateCartDto.quantity === 0)
+      ) {
+        const cartAfterDeleted = await tx.cart.update({
+          where: {
+            id: cart.id,
+          },
+          data: {
+            totalPrice: { decrement: item.product.price },
+            items: {
+              delete: {
+                id: item.id,
+              },
+            },
+          },
+          include: {
+            coupons: true,
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        });
+        return {
+          status: 200,
+          message: 'item deleted successfully',
+          data: cartAfterDeleted,
+        };
+      }
+      const totalPrice = cart.totalPrice;
+      const oldprice = item.product.price * item.quantity;
+      const newPrice = item.product.price * updateCartDto.quantity;
+
+      const updatedCart = await tx.cart.update({
+        where: {
+          userId,
+        },
+        data: {
+          ...(updateCartDto.quantity && {
+            totalPrice: { set: totalPrice - oldprice + newPrice },
+          }),
+          ...(updateCartDto.adjustment && {
+            totalPrice: {
+              ...(updateCartDto.adjustment == 1
+                ? { increment: item.product.price }
+                : { decrement: item.product.price }),
+            },
+          }),
+
+          items: {
+            update: {
+              where: {
+                cartId_productId: {
+                  cartId: cart.id,
+                  productId: item.product.id,
+                },
+              },
+              data: {
+                quantity: quantityUpdate,
+              },
+            },
+          },
+        },
+        include: {
+          coupons: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      return {
+        status: 200,
+        message: 'Cart updated successfully',
+        data: updatedCart,
+      };
+    });
+  }
+
+  async remove(
+    id: string,
+    userId: string,
+  ): Promise<AppResponse<Cart> & { cartItem?: number }> {
+    return await this.databaseSercice.$transaction(async (tx) => {
+      const { data: cart } = await this.find(userId);
+
+      const item = cart.items.find((item) => item.productId === id);
+      if (!item) throw new BadRequestException('Product not found in cart');
+
+      const finalCart = await tx.cart.update({
+        where: {
+          userId,
+        },
+        data: {
+          totalPrice: {
+            decrement: item.product.price * item.quantity,
+          },
+          items: {
+            delete: {
+              cartId_productId: {
+                cartId: cart.id,
+                productId: id,
+              },
+            },
+          },
+        },
+        include: {
+          coupons: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
 
       return {
         status: 200,
@@ -232,6 +341,7 @@ export class CartService {
   }
 
   // ========== admin routes ==========
+
   async findAll(id: string): Promise<AppResponse<Cart[]>> {
     const carts = await this.databaseSercice.cart.findMany({
       ...(id && { where: { userId: id } }),
@@ -259,5 +369,6 @@ export class CartService {
       data: cart,
     };
   }
+
   // ========== admin routes ==========
 }

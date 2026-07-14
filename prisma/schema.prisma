@@ -24,9 +24,10 @@ model User {
   requast          RequestProduct[]
   reviews          Review[]
   cart             Cart?
+  cartId           String?
+  orders           Order[]
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
-  cartId           String?
 }
 
 enum Role {
@@ -108,61 +109,58 @@ model Tax {
 }
 
 model Product {
-  id                 String       @id @default(uuid())
-  title              String       @unique
-  description        String
-  quantity           Int
-  imageCover         String
-  images             String[]
-  sold               Int          @default(0)
-  price              Float
-  priceAfterDiscount Float?
-  color              String[]
-  ratingAverage      Int          @default(0)
-  RatingQuantity     Int          @default(0)
-  categoryId         String
-  subCategoryId      String?
-  brandId            String?
-  category           Category     @relation(fields: [categoryId], references: [id])
-  subCategory        subCategory? @relation(fields: [subCategoryId], references: [id])
-  brand              Brand?       @relation(fields: [brandId], references: [id])
-  reviews            Review[]
-  cartItems          CartItem[]
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id             String       @id @default(uuid())
+  title          String       @unique
+  description    String
+  quantity       Int
+  imageCover     String
+  images         String[]
+  sold           Int          @default(0)
+  price          Float
+  discound       Float?
+  color          String[]
+  ratingAverage  Int          @default(0)
+  RatingQuantity Int          @default(0)
+  categoryId     String
+  subCategoryId  String?
+  brandId        String?
+  category       Category     @relation(fields: [categoryId], references: [id])
+  subCategory    subCategory? @relation(fields: [subCategoryId], references: [id])
+  brand          Brand?       @relation(fields: [brandId], references: [id])
+  reviews        Review[]
+  cartItems      CartItem[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Review {
-  id      String  @id @default(uuid())
-  content String?
-  rating  Int
-
+  id        String    @id @default(uuid())
+  content   String?
+  rating    Int
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
   deletedBy String?
-
   userId    String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@unique([productId, userId])
   @@index([productId, isDeleted])
 }
 
 model Cart {
-  id                      String     @id @default(uuid())
-  userId                  String     @unique
-  coupons                 Coupon[]
-  user                    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items                   CartItem[]
-  totalPrice              Float      @default(0)
-  totalPriceAfterDescount Float      @default(0)
-  createdAt               DateTime   @default(now())
-  updatedAt               DateTime   @updatedAt
+  id         String     @id @default(uuid())
+  userId     String     @unique
+  coupons    Coupon[]
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items      CartItem[]
+  totalPrice Float      @default(0)
+  totalDiscount Int @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
 model CartItem {
@@ -177,4 +175,41 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([cartId, productId])
+}
+
+model Order {
+  id              String            @id @default(uuid())
+  user            User              @relation(fields: [userId], references: [id])
+  userId          String
+  sessionId       String?
+  taxPrice        Int               @default(0)
+  shippingPrice   Int               @default(0)
+  totalOrderPrice Int
+  items           orderItem[]
+  paymentMethod   PaymentMethodType @default(card)
+  isPaid          Boolean           @default(false)
+  paidAt          DateTime?
+  isDeliverd      Boolean           @default(false)
+  deliverAt       DateTime?
+  shippingAddress String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model orderItem {
+  id           String   @id @default(uuid())
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId      String
+  productId    String
+  productName  String
+  productPrice Int
+  quantity     Int
+  totalPrice   Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum PaymentMethodType {
+  cash
+  card
 }

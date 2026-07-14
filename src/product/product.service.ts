@@ -43,6 +43,14 @@ export class ProductService {
     createProductDto.brandId &&
       (await this.brandService.findOne(createProductDto.brandId as UUID));
 
+    if (
+      createProductDto &&
+      createProductDto.price < createProductDto.discount
+    ) {
+      throw new ConflictException(
+        'Price after discount must be less than price',
+      );
+    }
     const product = await this.databaseService.product.create({
       data: createProductDto,
       include: productSelectAll,
@@ -66,9 +74,6 @@ export class ProductService {
 
     const sort = query?.sort || 'asc';
     const key = query?.key || undefined;
-    if (requestQuery.category) {
-      await this.categoryService.findOne(requestQuery.category);
-    }
     const whereConditions: any = {
       price: requestQuery.price || undefined,
       categoryId: requestQuery.category,

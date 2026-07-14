@@ -2,13 +2,12 @@ import { IsIn, IsInt, IsNumber, IsOptional, ValidateIf } from 'class-validator';
 
 export class UpdateCartDto {
   @IsOptional()
-  @ValidateIf((o) => o.adjustment === undefined)
-  @IsInt()
-  quantity?: number;
+  @ValidateIf((o) => !o.adjustment)
+  @IsNumber()
+  quantity: number;
 
-  @IsOptional()
-  @ValidateIf((o) => o.quantity === undefined) // تصحيح الخطأ الإملائي هنا
-  @IsInt()
+  @ValidateIf((o) => !o.quantity) 
+  @IsNumber()
   @IsIn([1, -1])
-  adjustment?: number;
+  adjustment: number;
 }

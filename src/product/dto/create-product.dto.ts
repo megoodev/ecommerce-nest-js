@@ -30,7 +30,7 @@ export class CreateProductDto {
   @IsOptional()
   @IsNumber()
   @Min(1)
-  priceAfterDiscount?: number;
+  discount?: number;
   @IsArray()
   color?: string[];
   @IsString()
