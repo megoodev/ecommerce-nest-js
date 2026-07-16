@@ -10,6 +10,7 @@ import { DatabaseService } from 'src/database/database.service';
 
 import { AppResponse } from 'src/utils/types';
 import { Request } from 'express';
+import { Order } from 'generated/prisma/client';
 
 @Injectable()
 export class OrderService {
@@ -168,5 +169,45 @@ export class OrderService {
         break;
       default:
     }
+  }
+
+  async findAll(): Promise<AppResponse<Order[]>> {
+    const orders = await this.databaseService.order.findMany({
+      include: {
+        items: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            address: true,
+          },
+        },
+      },
+    });
+    return {
+      status: 200,
+      message: 'Orders Found',
+      isEmpty: orders.length === 0,
+      length: orders.length,
+      data: orders,
+    };
+  }
+  async find(userId: string): Promise<AppResponse<Order[]>> {
+    const orders = await this.databaseService.order.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        items: true,
+      },
+    });
+    return {
+      status: 200,
+      message: 'Orders Found',
+      isEmpty: orders.length === 0,
+      length: orders.length,
+      data: orders,
+    };
   }
 }
